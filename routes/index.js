@@ -1,63 +1,52 @@
-var mongoose = require('mongoose');
-var User     = mongoose.model('User');
-var fs = require('fs');
-
-function isBlank(str) {
-  return (!str || /^\s*$/.test(str));
-}
-exports.current_user = function (req, res, next) {
-  next();
-};
-
-
-
-const users = [
-  // You know password for the user.
-  {name: 'user', password: 'pwd'},
-  // You don't know password for the admin.
-  {name: 'admin', password: Math.random().toString(32), canDelete: true},
-];
-
-let messages = [];
-let lastId = 1;
+const { body, validationResult } = require('express-validator');
+const fs = require('fs');
+const User = require('./models/user'); // Adjust the path to your User model
 
 function findUser(auth) {
-  return users.find((u) =>
-    u.name === auth.name &&
-    u.password === auth.password);
+  return users.find((u) => u.name === auth.name && u.password === auth.password);
 }
-///////////////////////////////////////////////////////////////////////////////
 
+exports.index = [
+  // Validate and sanitize inputs
+  body('username').trim().isAlphanumeric().escape(),
+  body('password').trim().isLength({ min: 5 }).escape(),
 
-
-exports.index = function (req, res, next) {
-  console.log(req.body);
-
-  var username =  req.body.username;
-  var password =  req.body.password;
-  var flag;
-  fs.readFile('./flag', function (err, data) {
-    if (err) {
-      throw err;
+  (req, res, next) => {
+    // Find validation errors in this request and wrap them in an object with handy functions
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-    flag=data;
-  });
 
-  User.find({ username: username, password: password  }, function (err, users) {
-    if (users.length > 0) {
-      return res.render('index', {
-        title: 'Admin Access Granted',
-        granted: true,
-        flag: flag,
+    // Extract sanitized inputs
+    const username = req.body.username;
+    const password = req.body.password;
+
+    var flag;
+    fs.readFile('./flag', function(err, data) {
+      if (err) {
+        throw err;
+      }
+      flag = data;
+
+      // Use parameterized query to prevent NoSQL injection
+      User.find({ username: username, password: password }, function(err, users) {
+        if (err) {
+          return next(err);
+        }
+        if (users.length > 0) {
+          return res.render('index', {
+            title: 'Admin Access Granted',
+            granted: true,
+            flag: flag,
+          });
+        } else {
+          return res.render('index', {
+            title: 'Have you tried pa55w0rd?',
+            granted: false,
+          });
+        }
       });
-    } else {
-      return res.render('index', {
-        title: 'have you tried pa55w0rd? ',
-        granted: false,
-      });
-    }
-  });
-
-};
-
-
+    });
+  }
+];
