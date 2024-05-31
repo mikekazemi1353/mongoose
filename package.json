@@ -25,6 +25,6 @@
     "semver": "^7.5.2"
   },
   "devDependencies": {
-    "tap": "^20.0.0"  // Ensure the latest version or remove if not needed
+    "tap": "^20.0.0"
   }
 }
