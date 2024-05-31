@@ -22,7 +22,9 @@
     "morgan": "latest",
     "optional": "^0.1.3",
     "stream-buffers": "^3.0.1",
-    "tap": "^19.0.2",
     "semver": "^7.5.2"
+  },
+  "devDependencies": {
+    "tap": "^20.0.0"  // Ensure the latest version or remove if not needed
   }
 }
