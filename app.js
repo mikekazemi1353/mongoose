@@ -42,8 +42,8 @@ if (app.get('env') == 'development') {
 
 // Read SSL certificate and key
 const options = {
-  key: fs.readFileSync('path/to/server.key'),
-  cert: fs.readFileSync('path/to/server.cert')
+  key: fs.readFileSync(path.join(__dirname, 'path/to/server.key')),
+  cert: fs.readFileSync(path.join(__dirname, 'path/to/server.cert'))
 };
 
 // Create HTTPS server
