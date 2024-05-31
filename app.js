@@ -6,7 +6,8 @@
 require('./db');
 
 var express = require('express');
-var http = require('http');
+var https = require('https');
+var fs = require('fs');
 var path = require('path');
 var ejsEngine = require('ejs-locals');
 var bodyParser = require('body-parser');
@@ -39,9 +40,13 @@ if (app.get('env') == 'development') {
   app.use(errorHandler());
 }
 
-// var token = 'SECRET_TOKEN_f8ed84e8f41e4146403dd4a6bbcea5e418d23a9';
-// console.log('token: ' + token);
+// Read SSL certificate and key
+const options = {
+  key: fs.readFileSync('path/to/server.key'),
+  cert: fs.readFileSync('path/to/server.cert')
+};
 
-http.createServer(app).listen(app.get('port'), function () {
-  console.log('Express server listening on port ' + app.get('port'));
+// Create HTTPS server
+https.createServer(options, app).listen(app.get('port'), function () {
+  console.log('Express HTTPS server listening on port ' + app.get('port'));
 });
